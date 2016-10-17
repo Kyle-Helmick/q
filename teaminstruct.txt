@@ -1,0 +1,14 @@
+Instructions on editing the repository.
+
+First pull the git to your local machine for editing and testing.
+You will need npm (a package for unix systems) to run the server.
+
+To the run the server be in the q directory and enter the command: npm start
+
+Once the changes you have made are running seamlessly with the code from the master branch you can push your changes to the git repository, remember to use the -m flag when commiting with an appropriate and descriptive message.
+
+Once the files have been updated on the master branch in github, log into the raspberry pi (10.203.54.50) with the username and passwords we created for each person in our first meeting. 
+
+cd to /, then cd to var/www (this is the directory with the website files)
+
+Do a git pull to pull from the master branch and the server should update with your changes.
