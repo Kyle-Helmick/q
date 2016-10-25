@@ -118,7 +118,8 @@ export declare class ElementAst implements TemplateAst {
     children: TemplateAst[];
     ngContentIndex: number;
     sourceSpan: ParseSourceSpan;
-    constructor(name: string, attrs: AttrAst[], inputs: BoundElementPropertyAst[], outputs: BoundEventAst[], references: ReferenceAst[], directives: DirectiveAst[], providers: ProviderAst[], hasViewContainer: boolean, children: TemplateAst[], ngContentIndex: number, sourceSpan: ParseSourceSpan);
+    endSourceSpan: ParseSourceSpan;
+    constructor(name: string, attrs: AttrAst[], inputs: BoundElementPropertyAst[], outputs: BoundEventAst[], references: ReferenceAst[], directives: DirectiveAst[], providers: ProviderAst[], hasViewContainer: boolean, children: TemplateAst[], ngContentIndex: number, sourceSpan: ParseSourceSpan, endSourceSpan: ParseSourceSpan);
     visit(visitor: TemplateAstVisitor, context: any): any;
 }
 /**
@@ -221,6 +222,7 @@ export declare enum PropertyBindingType {
  * A visitor for {@link TemplateAst} trees that will process each node.
  */
 export interface TemplateAstVisitor {
+    visit?(ast: TemplateAst, context: any): any;
     visitNgContent(ast: NgContentAst, context: any): any;
     visitEmbeddedTemplate(ast: EmbeddedTemplateAst, context: any): any;
     visitElement(ast: ElementAst, context: any): any;
