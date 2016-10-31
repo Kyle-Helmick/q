@@ -37,7 +37,7 @@ CREATE TABLE `profiles` (
 
 LOCK TABLES `profiles` WRITE;
 /*!40000 ALTER TABLE `profiles` DISABLE KEYS */;
-INSERT INTO `profiles` VALUES (1,'Test','User','2016-10-30 12:34:42');
+INSERT INTO `profiles` VALUES (1,'Test','User','2016-10-30 12:34:42'),(2,'a','b','2016-10-30 19:14:37'),(3,'c','d','2016-10-30 19:14:44'),(4,'e','f','2016-10-30 19:14:54'),(5,'puttest1','puttest2','2016-10-30 19:15:14');
 /*!40000 ALTER TABLE `profiles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -55,7 +55,7 @@ CREATE TABLE `sessions` (
   `logindate` datetime DEFAULT NULL,
   `ipaddr` tinytext,
   PRIMARY KEY (`sessionid`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -64,7 +64,7 @@ CREATE TABLE `sessions` (
 
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
-INSERT INTO `sessions` VALUES (1,1,'testuser','2016-10-30 12:41:30','127.0.0.1');
+INSERT INTO `sessions` VALUES (1,1,'testuser','2016-10-30 12:41:30','127.0.0.1'),(2,2,'a','2016-10-30 19:24:37','127.0.0.1'),(3,3,'c','2016-10-30 19:25:04','127.0.0.1'),(4,4,'puttest1','2016-10-30 19:25:49','1.2.3.4'),(5,5,'puttest1','2016-10-30 19:26:11','1.2.3.4');
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -108,7 +108,7 @@ CREATE TABLE `usrentries` (
   `duedate` datetime DEFAULT NULL,
   `priority` int(11) DEFAULT NULL,
   PRIMARY KEY (`entryid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -117,7 +117,7 @@ CREATE TABLE `usrentries` (
 
 LOCK TABLES `usrentries` WRITE;
 /*!40000 ALTER TABLE `usrentries` DISABLE KEYS */;
-INSERT INTO `usrentries` VALUES (1,1,'Finish doing SQL database stuff','CSCI 3308','2016-10-31 08:00:00',1),(2,1,'Insert waaay more rows.','CSCI 3308','2016-10-31 08:00:00',2);
+INSERT INTO `usrentries` VALUES (1,1,'Finish doing SQL database stuff','CSCI 3308','2016-10-31 08:00:00',1),(2,1,'Insert waaay more rows.','CSCI 3308','2016-10-31 08:00:00',2),(3,2,'moar stuff','CSCI 3308','2016-10-30 19:27:13',3),(4,2,'Do calc','Calc','2016-10-30 19:27:29',2),(5,2,'Concentrate science','Stuff','2016-10-30 19:27:50',1);
 /*!40000 ALTER TABLE `usrentries` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -130,4 +130,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-10-30 19:06:25
+-- Dump completed on 2016-10-30 19:28:33
