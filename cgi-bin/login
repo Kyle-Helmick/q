@@ -1,0 +1,115 @@
+#!/usr/bin/python
+
+import os
+import sys
+import cgi
+import hashlib
+import MySQLdb
+
+
+def gen_json(dat_dict):
+    print "{"
+    vals=list(dat_dict)
+    for i in range(0, len(vals)):
+        if i!=0:
+            sys.stdout.write(',\n')
+        sys.stdout.write('    "%s": "%s"' % (vals[i], str(dat_dict[vals[i]])))
+    print ""
+    print "}"
+
+
+def br():
+    print '<br>'
+
+
+def printheader():
+    print("Content-Type: application/json;charset=utf-8")
+    print('')
+
+
+def dbconnect(username, pwd):
+    return MySQLdb.connect("localhost", username, pwd, "qdata")
+
+
+def generror(err):
+    print(err)
+    print('')
+
+
+def genlogin(uname, pwd):
+    pwdhash=pwd # hashlib.sha1(pwd)
+    db=dbconnect('hashteam', 'passw0rd')
+    db.query("SELECT * FROM userlookup WHERE username='%s' AND passhash='%s'" % (uname, pwdhash))
+    vals=db.use_result()
+    try:
+        r=vals.fetch_row()[0]
+    except:
+        generror("Status:400")
+        return
+    printheader()
+    if len(r)!=0:
+        gen_json({'username':r[1], 'id':r[0], 'sessionid': 0})
+    #print r
+    #print "SELECT * FROM userlookup WHERE username='%s' AND passhash='%s'" % (uname, pwdhash)
+    db.close()
+
+
+def genuser(uname, pwd):
+    pwdhash=hashlib.sha1(pwd)
+    db=dbconnect('hashteam', 'passw0rd')
+    # Get the next id in the sequence:
+    db.query("SELECT id+1 FROM userlookup WHERE id=(SELECT MAX(id) FROM userlookup)")
+    vals=db.use_result()
+    newid=0
+    try:
+        newid=vals.fetch_row()[0]
+        newid=newid[0]
+
+        while len(vals.fetch_row())!=0:
+            pass
+
+    except:
+        generror("Status:400")
+        return
+    printheader()
+    db.query("INSERT INTO userlookup VALUES (%s, '%s', '%s')" % (str(newid), uname, pwd))
+    db.commit()
+    gen_json({'username':uname, 'userid':newid})
+    db.close()
+
+
+# Dispatcher code:
+def main(reqmethod, rsrc):
+    
+    #print("Hello, world")
+    #br()
+    #print('Request Method: ' + os.environ['REQUEST_METHOD'])
+
+    # Start dispatching stuff:
+    if rsrc is not None:
+        reqchunks=rsrc.split('/')[1:]
+
+        if len(reqchunks)!=2:
+            generror("Status:400")
+            return
+
+        if reqmethod=="GET":
+            genlogin(reqchunks[0], reqchunks[1])
+
+        elif reqmethod=="PUT":
+            genuser(reqchunks[0], reqchunks[1])
+
+    else:
+        generror("Status:400")
+
+rmethod="GET"
+rsrc=None
+
+try:
+    rmethod=os.environ['REQUEST_METHOD']
+    rsrc=os.environ['PATH_INFO']
+except:
+    pass
+
+main(rmethod, rsrc)
+
