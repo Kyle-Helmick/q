@@ -1,12 +1,17 @@
 #!/usr/bin/python
 
+# login - Script to get login-related information for clients.
+# Created by Michael Gohde around October 31, 2016.
+
+
 import os
 import sys
 import cgi
 import hashlib
 import MySQLdb
 
-
+# A quick function to convert a python dictionary to 
+# a json class. 
 def gen_json(dat_dict):
     print "{"
     vals=list(dat_dict)
@@ -18,44 +23,78 @@ def gen_json(dat_dict):
     print "}"
 
 
+# Prints a line break. Probably no longer useful.
 def br():
     print '<br>'
 
 
+# Generates and prints out an HTTP header for server output.
 def printheader():
     print("Content-Type: application/json;charset=utf-8")
     print('')
 
 
+# Returns a valid database connection given a database username and password.
 def dbconnect(username, pwd):
     return MySQLdb.connect("localhost", username, pwd, "qdata")
 
 
+# Prints an HTTP header representing an error.
 def generror(err):
     print(err)
     print('')
 
 
+def endquery(dbquery):
+    while len(dbquery.fetch_row())!=0:
+        pass
+
+
+# Returns a json object for the given user if the username and password
+# are found in the database.
 def genlogin(uname, pwd):
-    pwdhash=pwd # hashlib.sha1(pwd)
+    pwdhash=hashlib.sha1(pwd).hexdigest()
     db=dbconnect('hashteam', 'passw0rd')
     db.query("SELECT * FROM userlookup WHERE username='%s' AND passhash='%s'" % (uname, pwdhash))
     vals=db.use_result()
     try:
         r=vals.fetch_row()[0]
+
+        # Exhaust all other data in the query so MySQL doesn't 
+        # have a fit:
+        endquery(vals)
+
     except:
         generror("Status:400")
         return
-    printheader()
+
+    # This means that we found the user with correct password. 
+    # Generate a session and return info to the caller:
     if len(r)!=0:
-        gen_json({'username':r[1], 'id':r[0], 'sessionid': 0})
-    #print r
-    #print "SELECT * FROM userlookup WHERE username='%s' AND passhash='%s'" % (uname, pwdhash)
+        db.query("INSERT INTO sessions (userid, username, logindate, ipaddr) VALUES (%s, '%s', NOW(), '%s')" % (str(r[0]), r[1], '1.2.3.4'))
+        db.commit()
+        s=str(r[0])
+        db.query("SELECT sessionid FROM sessions WHERE userid='%s'" % s)
+        vals=db.use_result()
+        try:
+            sessionid=vals.fetch_row()[0]
+            sessionid=sessionid[0]
+            endquery(vals)
+            
+        except:
+            generror("Status:400")
+            return
+        printheader()
+
+        gen_json({'username':r[1], 'id':r[0], 'sessionid': sessionid})
+    else:
+        generror("Status:400")
     db.close()
 
 
+# Creates a new user and inserts useful info in the database.
 def genuser(uname, pwd):
-    pwdhash=hashlib.sha1(pwd)
+    pwdhash=hashlib.sha1(pwd).hexdigest()
     db=dbconnect('hashteam', 'passw0rd')
     # Get the next id in the sequence:
     db.query("SELECT id+1 FROM userlookup WHERE id=(SELECT MAX(id) FROM userlookup)")
@@ -72,7 +111,7 @@ def genuser(uname, pwd):
         generror("Status:400")
         return
     printheader()
-    db.query("INSERT INTO userlookup VALUES (%s, '%s', '%s')" % (str(newid), uname, pwd))
+    db.query("INSERT INTO userlookup VALUES (%s, '%s', '%s')" % (str(newid), uname, pwdhash))
     db.commit()
     gen_json({'username':uname, 'userid':newid})
     db.close()
@@ -80,11 +119,7 @@ def genuser(uname, pwd):
 
 # Dispatcher code:
 def main(reqmethod, rsrc):
-    
-    #print("Hello, world")
-    #br()
-    #print('Request Method: ' + os.environ['REQUEST_METHOD'])
-
+    sys.stderr=sys.stdout
     # Start dispatching stuff:
     if rsrc is not None:
         reqchunks=rsrc.split('/')[1:]
