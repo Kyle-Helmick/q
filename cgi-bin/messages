@@ -1,0 +1,83 @@
+#!/usr/bin/python
+
+# messages - Script to create, manage, and return individual queue items for a given user.
+# Created by Michael Gohde on Nov 1, 2016.
+
+
+import os
+import sys
+import cgi
+import hashlib
+import MySQLdb
+
+# A quick function to convert a python dictionary to 
+# a json class. 
+def gen_json(dat_dict):
+    print "{"
+    vals=list(dat_dict)
+    for i in range(0, len(vals)):
+        if i!=0:
+            sys.stdout.write(',\n')
+        sys.stdout.write('    "%s": "%s"' % (vals[i], str(dat_dict[vals[i]])))
+    print ""
+    print "}"
+
+
+# Prints a line break. Probably no longer useful.
+def br():
+    print '<br>'
+
+
+# Generates and prints out an HTTP header for server output.
+def printheader():
+    print("Content-Type: application/json;charset=utf-8")
+    print('')
+
+
+# Returns a valid database connection given a database username and password.
+def dbconnect(username, pwd):
+    return MySQLdb.connect("localhost", username, pwd, "qdata")
+
+
+# Prints an HTTP header representing an error.
+def generror(err):
+    print(err)
+    print('')
+
+
+def endquery(dbquery):
+    while len(dbquery.fetch_row())!=0:
+        pass
+
+
+# Dispatcher code:
+def main(reqmethod, rsrc):
+    sys.stderr=sys.stdout
+    # Start dispatching stuff:
+    if rsrc is not None:
+        reqchunks=rsrc.split('/')[1:]
+
+        if len(reqchunks)!=2:
+            generror("Status:400")
+            return
+
+        if reqmethod=="GET":
+            pass
+
+        elif reqmethod=="PUT":
+            pass
+
+    else:
+        generror("Status:400")
+
+rmethod="GET"
+rsrc=None
+
+try:
+    rmethod=os.environ['REQUEST_METHOD']
+    rsrc=os.environ['PATH_INFO']
+except:
+    pass
+
+main(rmethod, rsrc)
+
