@@ -11,7 +11,7 @@ import { Component } from '@angular/core';
 	<div class="login">
 	  <h2>Welcome!</h2>
 	  <form>
-	    Username:  <input type="text" name="username" /> <br>
+	    Username:  <input type="text" name="username" />
 	    Password:  <input type="text" name="password" />
 	  </form>
 	
