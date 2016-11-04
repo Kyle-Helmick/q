@@ -52,9 +52,11 @@ def endquery(dbquery):
 
 def delsession(reqid):
     db=dbconnect('hashteam', 'passw0rd')
-    db.query("DELETE FROM sessions WHERE id=%s" % str(reqid))
+    db.query("DELETE FROM sessions WHERE sessionid=%s" % str(reqid))
     db.commit()
     db.close()
+    printheader()
+    gen_json({'sessionid':reqid})
 
 
 # Dispatcher code:
@@ -70,7 +72,7 @@ def main(reqmethod, rsrc):
 
         # Remove a session from the table:
         if reqmethod=="DELETE":
-            delsession(reqchunks)
+            delsession(reqchunks[0])
 
         elif reqmethod=="PUT":
             pass
