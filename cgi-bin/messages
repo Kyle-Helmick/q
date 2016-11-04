@@ -10,6 +10,9 @@ import cgi
 import hashlib
 import MySQLdb
 
+dbuser='hashteam'
+dbpass='passw0rd'
+
 # A quick function to convert a python dictionary to 
 # a json class. 
 def gen_json(dat_dict):
@@ -49,6 +52,64 @@ def endquery(dbquery):
     while len(dbquery.fetch_row())!=0:
         pass
 
+
+def get_user_id(db, sessionid):
+    db.query("SELECT userid FROM sessions WHERE sessionid=%s" % sessionid)
+    vals=db.use_result()
+
+    try:
+        r=vals.fetch_row()[0]
+        endquery(db)
+        return r[0]
+    except:
+        return -1
+
+
+def newmessage(priority, content, cls, duedate, sessionid):
+    db=dbconnect(dbuser, dbpass)
+    userid=get_user_id(sessionid)
+    if userid<0:
+        generror("Status:400")
+        return
+
+    db.query("INSERT INTO usrentries (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), content, cls, duedate, priority))
+    db.commit()
+
+    # Determine what the message ID was:
+    db.query("SELECT entryid FROM usrentries WHERE description='%s'" % content)
+    vals=db.use_result()
+    
+    try:
+        r=vals.fetch_row()[0]
+        endquery(db)
+        printheader()
+        gen_json({'msgid':r[0]})
+    except:
+        generror("Status:400")
+
+
+def modmessage(messageid, newtitle, newpriority, newcontent, sessionid):
+    pass
+
+
+def delmessage(messageid, sessionid):
+    pass
+
+
+def list_messages(sessionid):
+    pass
+
+
+def get_message(messageid, sessionid):
+    pass
+
+
+def get_function_dispatcher(request_arr):
+    if len(request_arr)!=0:
+        if request_arr[1].upper()=='MESSAGES':
+            list_messages(request_arr[0])
+        else:
+            getmessage(request_arr[1], request_arr[0])
 
 # Dispatcher code:
 def main(reqmethod, rsrc):

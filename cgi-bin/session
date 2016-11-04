@@ -50,6 +50,13 @@ def endquery(dbquery):
         pass
 
 
+def delsession(reqid):
+    db=dbconnect('hashteam', 'passw0rd')
+    db.query("DELETE FROM sessions WHERE id=%s" % str(reqid))
+    db.commit()
+    db.close()
+
+
 # Dispatcher code:
 def main(reqmethod, rsrc):
     sys.stderr=sys.stdout
@@ -57,12 +64,13 @@ def main(reqmethod, rsrc):
     if rsrc is not None:
         reqchunks=rsrc.split('/')[1:]
 
-        if len(reqchunks)!=2:
+        if len(reqchunks)!=1:
             generror("Status:400")
             return
 
-        if reqmethod=="GET":
-            pass
+        # Remove a session from the table:
+        if reqmethod=="DELETE":
+            delsession(reqchunks)
 
         elif reqmethod=="PUT":
             pass
