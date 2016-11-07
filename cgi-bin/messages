@@ -72,8 +72,13 @@ def newmessage(priority, content, cls, duedate, sessionid):
         generror("Status:400")
         return
 
-    db.query("INSERT INTO usrentries (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), content, cls, duedate, priority))
-    db.commit()
+    try:
+        db.query("INSERT INTO usrentries (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), content, cls, duedate, priority))
+        db.commit()
+    except:
+        generror("Status:400")
+        db.close()
+        return
 
     # Determine what the message ID was:
     db.query("SELECT entryid FROM usrentries WHERE description='%s'" % content)
@@ -86,14 +91,60 @@ def newmessage(priority, content, cls, duedate, sessionid):
         gen_json({'msgid':r[0]})
     except:
         generror("Status:400")
+        db.close()
+        return
+
+    db.close()
 
 
-def modmessage(messageid, newtitle, newpriority, newcontent, sessionid):
-    pass
+def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid):
+    db=dbconnect(dbuser, dbpass)
+    userid=get_user_id(sessionid)
+    # This is a safe delete; it requires that the user id be correct for the deleted message:
+    try:
+        db.query("DELETE FROM usrentries WHERE entryid=%s AND userid=%s" % (messageid, userid))
+        db.commit()
+    except:
+        # Note: Come up with more descriptive errors than "invalid request"
+        generror("Status:400")
+        db.close()
+        return
 
+    # If everything's alright, insert a new message with the given idea:
+    db.query("INSERT INTO usrentries VALUES (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), newcontent, newcls, newduedate, newpriority)
+    db.commit()
+    
+    # Determine what the message ID was:
+    db.query("SELECT entryid FROM usrentries WHERE description='%s'" % content)
+    vals=db.use_result()
+    
+    try:
+        r=vals.fetch_row()[0]
+        endquery(db)
+        printheader()
+        gen_json({'msgid':r[0]})
+    except:
+        generror("Status:400")
+        db.close()
+        return
+    
+    
 
 def delmessage(messageid, sessionid):
-    pass
+    db=dbconnect(dbuser, dbpass)
+    userid=get_user_id(sessionid)
+    # This is a safe delete; it requires that the user id be correct for the deleted message:
+    try:
+        db.query("DELETE FROM usrentries WHERE entryid=%s AND userid=%s" % (messageid, userid))
+        db.commit()
+        db.close()
+        printheader()
+        gen_json({'msgid':messageid})
+    except:
+        # Note: Come up with more descriptive errors than "invalid request"
+        generror("Status:400")
+        db.close()
+        return
 
 
 def list_messages(sessionid):

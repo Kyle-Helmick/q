@@ -74,6 +74,7 @@ def main(reqmethod, rsrc):
         if reqmethod=="DELETE":
             delsession(reqchunks[0])
 
+        # Note: it would be a reasonably good idea to have the login script hand the user off to this to create a session proper.
         elif reqmethod=="PUT":
             pass
 
