@@ -1,0 +1,195 @@
+#!/usr/bin/python
+
+# messages - Script to create, manage, and return individual queue items for a given user.
+# Created by Michael Gohde on Nov 1, 2016.
+
+
+import os
+import sys
+import cgi
+import hashlib
+import MySQLdb
+
+dbuser='hashteam'
+dbpass='passw0rd'
+
+# A quick function to convert a python dictionary to 
+# a json class. 
+def gen_json(dat_dict):
+    print "{"
+    vals=list(dat_dict)
+    for i in range(0, len(vals)):
+        if i!=0:
+            sys.stdout.write(',\n')
+        sys.stdout.write('    "%s": "%s"' % (vals[i], str(dat_dict[vals[i]])))
+    print ""
+    print "}"
+
+
+# Prints a line break. Probably no longer useful.
+def br():
+    print '<br>'
+
+
+# Generates and prints out an HTTP header for server output.
+def printheader():
+    print("Content-Type: application/json;charset=utf-8")
+    print('')
+
+
+# Returns a valid database connection given a database username and password.
+def dbconnect(username, pwd):
+    return MySQLdb.connect("localhost", username, pwd, "qdata")
+
+
+# Prints an HTTP header representing an error.
+def generror(err):
+    print(err)
+    print('')
+
+
+def endquery(dbquery):
+    while len(dbquery.fetch_row())!=0:
+        pass
+
+
+def get_user_id(db, sessionid):
+    db.query("SELECT userid FROM sessions WHERE sessionid=%s" % sessionid)
+    vals=db.use_result()
+
+    try:
+        r=vals.fetch_row()[0]
+        endquery(db)
+        return r[0]
+    except:
+        return -1
+
+
+def newmessage(priority, content, cls, duedate, sessionid):
+    db=dbconnect(dbuser, dbpass)
+    userid=get_user_id(sessionid)
+    if userid<0:
+        generror("Status:400")
+        return
+
+    try:
+        db.query("INSERT INTO usrentries (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), content, cls, duedate, priority))
+        db.commit()
+    except:
+        generror("Status:400")
+        db.close()
+        return
+
+    # Determine what the message ID was:
+    db.query("SELECT entryid FROM usrentries WHERE description='%s'" % content)
+    vals=db.use_result()
+    
+    try:
+        r=vals.fetch_row()[0]
+        endquery(db)
+        printheader()
+        gen_json({'msgid':r[0]})
+    except:
+        generror("Status:400")
+        db.close()
+        return
+
+    db.close()
+
+
+def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid):
+    db=dbconnect(dbuser, dbpass)
+    userid=get_user_id(sessionid)
+    # This is a safe delete; it requires that the user id be correct for the deleted message:
+    try:
+        db.query("DELETE FROM usrentries WHERE entryid=%s AND userid=%s" % (messageid, userid))
+        db.commit()
+    except:
+        # Note: Come up with more descriptive errors than "invalid request"
+        generror("Status:400")
+        db.close()
+        return
+
+    # If everything's alright, insert a new message with the given idea:
+    db.query("INSERT INTO usrentries VALUES (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), newcontent, newcls, newduedate, newpriority)
+    db.commit()
+    
+    # Determine what the message ID was:
+    db.query("SELECT entryid FROM usrentries WHERE description='%s'" % content)
+    vals=db.use_result()
+    
+    try:
+        r=vals.fetch_row()[0]
+        endquery(db)
+        printheader()
+        gen_json({'msgid':r[0]})
+    except:
+        generror("Status:400")
+        db.close()
+        return
+    
+    
+
+def delmessage(messageid, sessionid):
+    db=dbconnect(dbuser, dbpass)
+    userid=get_user_id(sessionid)
+    # This is a safe delete; it requires that the user id be correct for the deleted message:
+    try:
+        db.query("DELETE FROM usrentries WHERE entryid=%s AND userid=%s" % (messageid, userid))
+        db.commit()
+        db.close()
+        printheader()
+        gen_json({'msgid':messageid})
+    except:
+        # Note: Come up with more descriptive errors than "invalid request"
+        generror("Status:400")
+        db.close()
+        return
+
+
+def list_messages(sessionid):
+    pass
+
+
+def get_message(messageid, sessionid):
+    pass
+
+
+def get_function_dispatcher(request_arr):
+    if len(request_arr)!=0:
+        if request_arr[1].upper()=='MESSAGES':
+            list_messages(request_arr[0])
+        else:
+            getmessage(request_arr[1], request_arr[0])
+
+# Dispatcher code:
+def main(reqmethod, rsrc):
+    sys.stderr=sys.stdout
+    # Start dispatching stuff:
+    if rsrc is not None:
+        reqchunks=rsrc.split('/')[1:]
+
+        if len(reqchunks)!=2:
+            generror("Status:400")
+            return
+
+        if reqmethod=="GET":
+            pass
+
+        elif reqmethod=="PUT":
+            pass
+
+    else:
+        generror("Status:400")
+
+rmethod="GET"
+rsrc=None
+
+try:
+    rmethod=os.environ['REQUEST_METHOD']
+    rsrc=os.environ['PATH_INFO']
+except:
+    pass
+
+main(rmethod, rsrc)
+
