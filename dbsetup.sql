@@ -2,7 +2,7 @@
 CREATE DATABASE qdata;
 
 -- Change the following password:
-CREATE USER 'hashteam' IDENTIFIED BY 'examplepassword';
+CREATE USER 'hashteam'@'localhost' IDENTIFIED BY 'examplepassword';
 USE qdata;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;

@@ -49,11 +49,15 @@ def generror(err):
 
 
 def endquery(dbquery):
-    while len(dbquery.fetch_row())!=0:
+    try:
+        while len(dbquery.fetch_row())!=0:
+            pass
+    except:
         pass
 
 
 def get_user_id(db, sessionid):
+    sys.stderr.write("Looking up user for sessionid %s\n" % sessionid)
     db.query("SELECT userid FROM sessions WHERE sessionid=%s" % sessionid)
     vals=db.use_result()
 
@@ -111,7 +115,7 @@ def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid
         return
 
     # If everything's alright, insert a new message with the given idea:
-    db.query("INSERT INTO usrentries VALUES (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), newcontent, newcls, newduedate, newpriority)
+    db.query("INSERT INTO usrentries VALUES (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), newcontent, newcls, newduedate, newpriority))
     db.commit()
     
     # Determine what the message ID was:
@@ -148,23 +152,80 @@ def delmessage(messageid, sessionid):
 
 
 def list_messages(sessionid):
-    pass
+    err=sys.stderr
+    err.write("Listing messages for session %s\n" % str(sessionid))
+    db=dbconnect(dbuser, dbpass)
+    userid=get_user_id(db, sessionid)
+    err.write("userid: %s\n" % str(userid))
+    resplist=[]
+    try:
+        db.query("SELECT entryid, title FROM usrentries WHERE userid=%s" % userid)
+        vals=db.use_result()
+        
+        # Since there really isn't a good way of determining the size of this query without using a whole different query:
+        while True:
+            tmp=vals.fetch_row()
+            err.write("Contents of tmp: %s\n" % str(tmp))
+            
+            if len(tmp)==0:
+                break
+            else:
+                resplist.append(tmp)
+        db.close()
+        
+        printheader()
+        entrydict={}
+        
+        for r in resplist:
+            # mysqldb returns data in a strange way. Some queries are structured as tuples of 
+            # tuples where only the first chunk of the outer tuple is useful.
+            r=r[0]
+            entrydict[str(r[0])]=str(r[1])
+        
+        gen_json(entrydict)
+    except:
+        generror("Status:400")
+        db.close()
+        return
 
 
 def get_message(messageid, sessionid):
-    pass
+    db=dbconnect(dbuser, dbpass)
+    userid=get_user_id(db, sessionid)
+    
+    if userid==-1:
+        generror("Status:400")
+        db.close()
+        return
+        
+    try:
+        db.query("SELECT * FROM usrentries WHERE userid=%s AND entryid=%s" % (str(userid), messageid))
+        vals=db.use_result()
+        
+        r=vals.fetch_row()
+        endquery(vals)
+        
+        r=r[0]
+        retdict={'entryid': r[0], 'userid': r[1], 'text': r[2], 'class': r[3], 'duedate': r[4], 'priority': r[5], 'title': r[6]}
+        printheader()
+        gen_json(retdict)
+    except:
+        generror("Status:400")
+        db.close()
+        return
 
 
 def get_function_dispatcher(request_arr):
     if len(request_arr)!=0:
-        if request_arr[1].upper()=='MESSAGES':
+        if request_arr[1].upper()=='LIST':
             list_messages(request_arr[0])
         else:
-            getmessage(request_arr[1], request_arr[0])
+            get_message(request_arr[1], request_arr[0])
+
 
 # Dispatcher code:
 def main(reqmethod, rsrc):
-    sys.stderr=sys.stdout
+    #sys.stderr=sys.stdout
     # Start dispatching stuff:
     if rsrc is not None:
         reqchunks=rsrc.split('/')[1:]
@@ -174,7 +235,7 @@ def main(reqmethod, rsrc):
             return
 
         if reqmethod=="GET":
-            pass
+            get_function_dispatcher(reqchunks)
 
         elif reqmethod=="PUT":
             pass
