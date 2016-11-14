@@ -1,0 +1,179 @@
+<html>
+    <!-- messages-demo.html -- Extremely ugly disaster of an HTML file demonstrating how to
+         query the messages API.
+         Created by Michael Gohde on 2016-11-13 -->
+ 
+ 
+    <title>Extremely Radical Message Listing, Fetching, and Insertion Demo 3000.</title>
+    
+    
+    
+    <a href="javascript:void(0)" onclick="showHideAddForm()">Show/Hide Message Addition Form</a>
+    <div id="formaddresp" style="Visibility:hidden">
+        <form class="topdiv" name="addform" action=" method="get">
+            Session: <input type="text" name="sessionbox" value="2"><p>
+            Title: <input type="text" name="titlebox" value="title"><p>
+            Class: <input type="text" name="classbox" value="class"><p>
+            Content: <input type="text" name="contentbox" value="your content here"><p>
+            Priority: <input type="text" name="prioritybox" value="1"><p>
+            Due date: <input type="text" name="datebox" value="2016-11-13"><p>
+            <input type="button" name="button" value="Insert Message in Database" onClick="doInsert(this.form)">
+        </form>
+    </div>
+
+    <form name="updateform" action="" method="get">
+        Session ID:<br>
+        <input type="text" name="sessionbox" value="2"><p>
+        <input type="button" name="button" value="Click to get messages." onClick="doUpdate(this.form)">
+    </form>
+    
+    <p>Message List:</p>
+    <div id="listdiv"><p>Content needed!</p></div>
+
+    <style>
+        .topdiv
+        {
+            margin-left:auto;
+            margin-right:auto;
+            background-color:lightblue;
+            border:2px solid black;
+        }
+        
+        .subdiv
+        {
+            margin-left:4em;
+            margin-right:4em;
+            background-color:lightgreen;
+            border:2px solid black;
+        }
+    </style>
+
+    <script>
+        //Yes, this is a dumb way of sharing session ID stuff:
+        var updatesessionid="2";
+        
+        function doInsert(form)
+        {
+            var sessionid=form.sessionbox.value;
+            var title=encodeURIComponent(form.titlebox.value);
+            var classname=encodeURIComponent(form.classbox.value);
+            var content=encodeURIComponent(form.contentbox.value);
+            var duedate=encodeURIComponent(form.datebox.value);
+            var priority=encodeURIComponent(form.prioritybox.value);
+            var xhttp=new XMLHttpRequest();
+            
+            xhttp.onreadystatechange=function(){
+                var dest=document.getElementById("formaddresp");
+                
+                if(this.status==200 && this.readyState==4)
+                {
+                    var jobj=JSON.parse(this.responseText);
+                    dest.innerHTML="Data added. ID: "+jobj["msgid"];
+                }
+                
+                else if(this.status==400)
+                {
+                    dest.innerHTML="Couldn't post data to server.";
+                }
+            }
+            
+            xhttp.open("PUT", "cgi-bin/messages/"+sessionid+"/"+priority+"/"+content+"/"+classname+"/"+duedate+"/"+title, true);
+            xhttp.send();
+        }
+    
+        function doUpdate(form)
+        {
+            var xhttp=new XMLHttpRequest();
+            var sessionid=form.sessionbox.value;
+            updatesessionid=sessionid;
+
+            xhttp.onreadystatechange=function(){
+                    var dest=document.getElementById("listdiv");
+                    var destcontent="";
+
+                    if(this.status==200)
+                    {
+                        var jobj=JSON.parse(this.responseText);
+                        var i=0;
+                        
+                        for(var key in jobj)
+                        {
+                            var idstr=key+"id";
+                            destcontent=destcontent+"<div id=\""+idstr+"\" class=\"topdiv\"><p>Object id: "+key+". Title: "+jobj[key];
+                            destcontent=destcontent+" <a onclick=\"doMessage("+key+")\" href=\"javascript:void(0);\">Expand</a>";
+                            destcontent=destcontent+"</p></div>\n";
+                            
+                            //i++;
+                        }
+                        
+                        dest.innerHTML=destcontent;
+                    }
+                    
+                    else if(this.status==400)
+                    {
+                        dest.innerHTML="Server was unable to fulfill request. This is bad!";
+                    }
+                }
+                
+            xhttp.open("GET", "cgi-bin/messages/"+sessionid+"/list", true);
+            xhttp.send();
+        }
+        
+        function doMessage(msgid)
+        {
+            var idstr=msgid+"id";
+            var xhttp=new XMLHttpRequest();
+            
+            xhttp.onreadystatechange=function(){
+                    var dest=document.getElementById(idstr);
+                    
+                    if(this.status==200 && this.readyState==4)
+                    {
+                        var jobj=JSON.parse(this.responseText);
+                        var attriblist=["text", "class", "duedate"];
+                        var attribname=["Text", "Class name", "Due date"];
+                        
+                        for(var a in attriblist)
+                        {
+                            //Create a title element:
+                            var topelem=document.createElement("p");
+                            topelem.appendChild(document.createTextNode(attribname[a]+":"));
+                            
+                            var elem=document.createElement("div");
+                            elem.setAttribute("class", "subdiv");
+                            
+                            elem.appendChild(document.createTextNode(jobj[attriblist[a]]));
+                            topelem.appendChild(elem);
+                            dest.appendChild(topelem);
+                        }
+                    }
+                    
+                    else if(this.status==400)
+                    {
+                        dest.innerHTML="Could not retrieve message from server.";
+                    }
+                }
+                
+            xhttp.open("GET", "cgi-bin/messages/"+updatesessionid+"/"+msgid, true);
+            xhttp.send();
+        }
+        
+        var prevFormState=0;
+        function showHideAddForm()
+        {
+            var frm=document.getElementById("formaddresp");
+            
+            if(prevFormState==0)
+            {
+                frm.style.visibility="visible";
+            }
+            
+            else
+            {
+                frm.style.visibility="hidden";
+            }
+            
+            prevFormState=!prevFormState;
+        }
+    </script>
+</html>
