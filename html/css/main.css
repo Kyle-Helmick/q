@@ -223,13 +223,18 @@ a:hover, a:focus {
    Text Formats
    ========================================================================== */
 
-.iphonetext-left-right {
-
+.iphonetext {
+  position: relative;
+  min-height: 1px;
+  padding-right: 15px;
+  padding-left: 15px;
+  width: 33.33333333%;
+  background-color: rgba(0,0,0,.55);
 }
-.iphonetext-middle {
-  
-}
 
+.iphonetext h3, p{
+  color: white;
+}
 
 /* ==========================================================================
    Nav Styles
@@ -632,12 +637,14 @@ footer {
   letter-spacing: 0px;
 }
 
-.white {
-   color: black;
-}
-
 #be-the-first {
       background-attachment: scroll;
+  }
+
+  .iphonetext{
+    float: none;
+    width: 100%;
+    padding-bottom: 2%;
   }
 
 }
@@ -650,6 +657,12 @@ footer {
       background-attachment: scroll;
   }
 
+  .iphonetext{
+    float: none;
+    width: 100%;
+    padding-bottom: 2%;
+  }
+
 }
 
 
@@ -660,6 +673,9 @@ footer {
       background-attachment: scroll;
   }
 
+  .iphonetext {
+    float: left;
+  }
 }
 
 
@@ -667,6 +683,9 @@ footer {
 /* Desktops and laptops ----------- */
 @media (min-width: 992px) and (max-width: 1199px) {
 
+  .iphonetext {
+    float: left;
+  }
 }
 
 
@@ -674,4 +693,7 @@ footer {
 /* Large screens ----------- */
 @media (min-width: 1200px) and (max-width: 3000px) {
 
+  .iphonetext {
+    float: left;
+  }
 }
