@@ -1,0 +1,44 @@
+<html>
+    <!-- login-demo.html -- Example HTML file demonstrating how to query the login API.
+         Created by Michael Gohde on 2016-11-13 -->
+
+    <title>Totally amazing, AJAX-tastic login demo page!</title>
+    <p>Enter your login information stuff here:</p>
+    <form name="loginform" action="" method="get">
+        Put some shite in the boxes:</br>
+        <input type="text" name="usernamebox" value="username"><p>
+        <input type="text" name="passwordbox" value="password"><p>
+        <input type="button" name="button" value="Log in!" onClick="doLogin(this.form)">
+    </form>
+
+    <p>Response from login server</p>
+    <p id="loginresp">Log in, first!</p>
+    
+    <script>
+        function doLogin(form)
+        {
+            var xhttp=new XMLHttpRequest();
+            var username=form.usernamebox.value;
+            var password=form.passwordbox.value;
+
+            xhttp.onreadystatechange= function() {
+                    var resptag=document.getElementById("loginresp");
+
+                    if(this.readyState=4 && this.status==200)
+                    {
+                        var jobj=JSON.parse(this.responseText);
+                        resptag.innerHTML="Session id: "+jobj['sessionid'];
+                    }
+
+                    else if(this.status==400)
+                    {
+                        resptag.innerHTML="Invalid username/password.";
+                    }
+                }
+
+            xhttp.open("GET", "cgi-bin/login/"+username+"/"+password, true);
+            xhttp.send();
+            //alert("You typed "+username+", "+password);
+        }
+    </script>
+</html>

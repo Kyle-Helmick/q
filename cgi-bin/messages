@@ -9,6 +9,7 @@ import sys
 import cgi
 import hashlib
 import MySQLdb
+import urllib
 
 dbuser='hashteam'
 dbpass='passw0rd'
@@ -57,7 +58,7 @@ def endquery(dbquery):
 
 
 def get_user_id(db, sessionid):
-    sys.stderr.write("Looking up user for sessionid %s\n" % sessionid)
+    #sys.stderr.write("Looking up user for sessionid %s\n" % sessionid)
     db.query("SELECT userid FROM sessions WHERE sessionid=%s" % sessionid)
     vals=db.use_result()
 
@@ -69,15 +70,16 @@ def get_user_id(db, sessionid):
         return -1
 
 
-def newmessage(priority, content, cls, duedate, sessionid):
+def newmessage(sessionid, priority, content, cls, duedate, title):
     db=dbconnect(dbuser, dbpass)
-    userid=get_user_id(sessionid)
+    userid=get_user_id(db, sessionid)
+    
     if userid<0:
         generror("Status:400")
         return
 
     try:
-        db.query("INSERT INTO usrentries (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), content, cls, duedate, priority))
+        db.query("INSERT INTO usrentries (userid, description, class, duedate, priority, title) VALUES (%s, '%s', '%s', '%s', '%s', '%s')" % (str(userid), content, cls, duedate, priority, title))
         db.commit()
     except:
         generror("Status:400")
@@ -216,11 +218,13 @@ def get_message(messageid, sessionid):
 
 
 def get_function_dispatcher(request_arr):
-    if len(request_arr)!=0:
+    if len(request_arr)==2:
         if request_arr[1].upper()=='LIST':
             list_messages(request_arr[0])
         else:
             get_message(request_arr[1], request_arr[0])
+    else:
+        generror("Status:400")
 
 
 # Dispatcher code:
@@ -230,15 +234,13 @@ def main(reqmethod, rsrc):
     if rsrc is not None:
         reqchunks=rsrc.split('/')[1:]
 
-        if len(reqchunks)!=2:
-            generror("Status:400")
-            return
-
         if reqmethod=="GET":
             get_function_dispatcher(reqchunks)
-
-        elif reqmethod=="PUT":
-            pass
+        elif reqmethod=="PUT" and len(reqchunks)==6:
+            newmessage(reqchunks[0], reqchunks[1], reqchunks[2], reqchunks[3], reqchunks[4], reqchunks[5])
+        else:
+            generror("Status:400")
+            
 
     else:
         generror("Status:400")
@@ -248,7 +250,7 @@ rsrc=None
 
 try:
     rmethod=os.environ['REQUEST_METHOD']
-    rsrc=os.environ['PATH_INFO']
+    rsrc=urllib.unquote(os.environ['PATH_INFO'])
 except:
     pass
 
