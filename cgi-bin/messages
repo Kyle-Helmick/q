@@ -44,8 +44,9 @@ def dbconnect(username, pwd):
 
 
 # Prints an HTTP header representing an error.
-def generror(err):
-    print(err)
+def generror():#err):
+    print("Status:400")
+    #print(err)
     print('')
 
 
@@ -75,14 +76,14 @@ def newmessage(sessionid, priority, content, cls, duedate, title):
     userid=get_user_id(db, sessionid)
     
     if userid<0:
-        generror("Status:400")
+        generror()
         return
 
     try:
         db.query("INSERT INTO usrentries (userid, description, class, duedate, priority, title) VALUES (%s, '%s', '%s', '%s', '%s', '%s')" % (str(userid), content, cls, duedate, priority, title))
         db.commit()
     except:
-        generror("Status:400")
+        generror()
         db.close()
         return
 
@@ -96,7 +97,7 @@ def newmessage(sessionid, priority, content, cls, duedate, title):
         printheader()
         gen_json({'entryid':r[0]})
     except:
-        generror("Status:400")
+        generror()
         db.close()
         return
 
@@ -113,7 +114,7 @@ def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid
         db.commit()
     except:
         # Note: Come up with more descriptive errors than "invalid request"
-        generror("Status:400")
+        generror()
         db.close()
         return
 
@@ -131,7 +132,7 @@ def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid
         printheader()
         gen_json({'entryid':r[0]})
     except:
-        generror("Status:400")
+        generror()
         db.close()
         return
     
@@ -149,7 +150,7 @@ def delmessage(messageid, sessionid):
         gen_json({'entryid':messageid})
     except:
         # Note: Come up with more descriptive errors than "invalid request"
-        generror("Status:400")
+        generror()
         db.close()
         return
 
@@ -187,7 +188,7 @@ def list_messages(sessionid):
         
         gen_json(entrydict)
     except:
-        generror("Status:400")
+        generror()
         db.close()
         return
 
@@ -197,7 +198,7 @@ def get_message(messageid, sessionid):
     userid=get_user_id(db, sessionid)
     
     if userid==-1:
-        generror("Status:400")
+        generror()
         db.close()
         return
         
@@ -213,9 +214,18 @@ def get_message(messageid, sessionid):
         printheader()
         gen_json(retdict)
     except:
-        generror("Status:400")
+        generror()
         db.close()
         return
+
+
+def new_message_wrapper(sessionid, querydata):
+    querytoks=querydata.split(',')
+    
+    if len(querytoks)==5:
+        newmessage(sessionid, querytoks[0], querytoks[1], querytoks[2], querytoks[3], querytoks[4])
+    else:
+        generror()
 
 
 def get_function_dispatcher(request_arr):
@@ -225,11 +235,11 @@ def get_function_dispatcher(request_arr):
         else:
             get_message(request_arr[1], request_arr[0])
     else:
-        generror("Status:400")
+        generror()
 
 
 # Dispatcher code:
-def main(reqmethod, rsrc):
+def main(reqmethod, rsrc, query):
     #sys.stderr=sys.stdout
     # Start dispatching stuff:
     if rsrc is not None:
@@ -239,12 +249,14 @@ def main(reqmethod, rsrc):
             get_function_dispatcher(reqchunks)
         elif reqmethod=="PUT" and len(reqchunks)==6:
             newmessage(reqchunks[0], reqchunks[1], reqchunks[2], reqchunks[3], reqchunks[4], reqchunks[5])
+        elif reqmethod=="PUT" and len(reqchunks)==1:
+            new_message_wrapper(reqchunks[0], query)
         elif reqmethod=="DELETE" and len(reqchunks)==2:
-            delmessage(reqchunks[0], reqchunks[1])
+            delmessage(reqchunks[1], reqchunks[0])
         else:
-            generror("Status:400")
+            generror()
     else:
-        generror("Status:400")
+        generror()
 
 
 rmethod="GET"
@@ -258,5 +270,5 @@ try:
 except:
     pass
 
-main(rmethod, rsrc)
+main(rmethod, rsrc, query)
 
