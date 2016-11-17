@@ -117,6 +117,15 @@ def genuser(uname, pwd):
     db.close()
 
 
+def delsession(reqid):
+    db=dbconnect('hashteam', 'passw0rd')
+    db.query("DELETE FROM sessions WHERE sessionid=%s" % str(reqid))
+    db.commit()
+    db.close()
+    printheader()
+    gen_json({'sessionid':reqid})
+
+
 # Dispatcher code:
 def main(reqmethod, rsrc):
     sys.stderr=sys.stdout
@@ -124,15 +133,19 @@ def main(reqmethod, rsrc):
     if rsrc is not None:
         reqchunks=rsrc.split('/')[1:]
 
-        if len(reqchunks)!=2:
+        if len(reqchunks)==1 and reqmethod=="DELETE":
+            delsession(reqchunks[0])
+            
+        elif len(reqchunks)==2:
+            if reqmethod=="GET":
+                genlogin(reqchunks[0], reqchunks[1])
+
+            elif reqmethod=="PUT":
+                genuser(reqchunks[0], reqchunks[1])
+                
+        else:
             generror("Status:400")
             return
-
-        if reqmethod=="GET":
-            genlogin(reqchunks[0], reqchunks[1])
-
-        elif reqmethod=="PUT":
-            genuser(reqchunks[0], reqchunks[1])
 
     else:
         generror("Status:400")
