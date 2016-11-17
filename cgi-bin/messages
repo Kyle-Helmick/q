@@ -104,9 +104,9 @@ def newmessage(sessionid, priority, content, cls, duedate, title):
     db.close()
 
 
-def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid, newtitle):
+def modmessage(sessionid, messageid, priority, content, cls, duedate, title):
     db=dbconnect(dbuser, dbpass)
-    userid=get_user_id(sessionid)
+    userid=get_user_id(db, sessionid)
     
     # This is a safe delete; it requires that the user id be correct for the deleted message:
     try:
@@ -119,7 +119,7 @@ def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid
         return
 
     # If everything's alright, insert a new message with the given idea:
-    db.query("INSERT INTO usrentries VALUES (userid, description, class, duedate, priority, title) VALUES (%s, '%s', '%s', '%s', '%s', '%s')" % (str(userid), newcontent, newcls, newduedate, newpriority, newtitle))
+    db.query("INSERT INTO usrentries (userid, description, class, duedate, priority, title) VALUES (%s, '%s', '%s', '%s', '%s', '%s')" % (str(userid), content, cls, duedate, priority, title))
     db.commit()
     
     # Determine what the message ID was:
@@ -228,6 +228,15 @@ def new_message_wrapper(sessionid, querydata):
         generror()
 
 
+def mod_message_wrapper(sessionid, messageid, querydata):
+    querytoks=querydata.split(',')
+    
+    if len(querytoks)==5:
+        modmessage(sessionid, messageid, querytoks[0], querytoks[1], querytoks[2], querytoks[3], querytoks[4])
+    else:
+        generror()
+
+
 def get_function_dispatcher(request_arr):
     if len(request_arr)==2:
         if request_arr[1].upper()=='LIST':
@@ -249,10 +258,14 @@ def main(reqmethod, rsrc, query):
             get_function_dispatcher(reqchunks)
         elif reqmethod=="PUT" and len(reqchunks)==6:
             newmessage(reqchunks[0], reqchunks[1], reqchunks[2], reqchunks[3], reqchunks[4], reqchunks[5])
-        elif reqmethod=="PUT" and len(reqchunks)==1:
+        elif reqmethod=="PUT" and len(reqchunks)==1 and query!=None:
             new_message_wrapper(reqchunks[0], query)
         elif reqmethod=="DELETE" and len(reqchunks)==2:
             delmessage(reqchunks[1], reqchunks[0])
+        elif reqmethod=="PATCH" and len(reqchunks)==7:
+            modmessage(reqchunks[0], reqchunks[1], reqchunks[2], reqchunks[3], reqchunks[4], reqchunks[5], reqchunks[6])
+        elif reqmethod=="PATCH" and len(reqchunks)==3 and query!=None:
+            mod_message_wrapper(reqchunks[0], reqchunks[1], query)
         else:
             generror()
     else:
