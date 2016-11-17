@@ -612,7 +612,17 @@ footer {
     opacity: 1;
 }
 
+.todo-form input{
+  color: black;
+  font-weight: normal;
+}
 
+.todo-form p{
+  color: #fff;
+  font-size: 2em;
+  font-style: normal;
+  font-weight: bold;
+}
 
 
 /* ==========================================================================
