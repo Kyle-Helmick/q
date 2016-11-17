@@ -1,6 +1,32 @@
+function doCreate(form)
+{
+    var xhttp=new XMLHttpRequest();
+    var username=form.usernamebox.value;
+    var password=form.passwordbox.value;
+
+    xhttp.onreadystatechange= function() {
+            var resptag=document.getElementById("loginresp");
+
+            if(this.readyState==4 && this.status==200)
+            {
+                var jobj=JSON.parse(this.responseText);
+                resptag.innerHTML="Session id: "+jobj['sessionid'];
+            }
+
+            else if(this.status==400)
+            {
+                resptag.innerHTML="Invalid username/password.";
+            }
+        }
+
+    xhttp.open("PUT", "cgi-bin/login/"+username+"/"+password, true);
+    xhttp.send();
+    //alert("You typed "+username+", "+password);
+}
+
 $(document).ready(function(){
-  
-  
+
+
   //------------------------------------//
   //Navbar//
   //------------------------------------//
@@ -16,20 +42,20 @@ $(document).ready(function(){
     			}
     		}
     	});
-  
-  
+
+
   //------------------------------------//
   //Scroll To//
   //------------------------------------//
-  $(".scroll").click(function(event){		
+  $(".scroll").click(function(event){
   	event.preventDefault();
   	$('html,body').animate({scrollTop:$(this.hash).offset().top}, 800);
-  	
+
   });
-  
+
   //------------------------------------//
   //Wow Animation//
-  //------------------------------------// 
+  //------------------------------------//
   wow = new WOW(
         {
           boxClass:     'wow',      // animated element css class (default is wow)
@@ -41,5 +67,5 @@ $(document).ready(function(){
       wow.init();
 
 
-	
+
 });

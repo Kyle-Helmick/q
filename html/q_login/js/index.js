@@ -12,7 +12,6 @@ function doLogin(form)
                 var jobj=JSON.parse(this.responseText);
                 resptag.innerHTML="Session id: "+jobj['sessionid'];
             }
-
             else if(this.status==400)
             {
                 resptag.innerHTML="Invalid username/password.";
