@@ -103,9 +103,10 @@ def newmessage(sessionid, priority, content, cls, duedate, title):
     db.close()
 
 
-def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid):
+def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid, newtitle):
     db=dbconnect(dbuser, dbpass)
     userid=get_user_id(sessionid)
+    
     # This is a safe delete; it requires that the user id be correct for the deleted message:
     try:
         db.query("DELETE FROM usrentries WHERE entryid=%s AND userid=%s" % (messageid, userid))
@@ -117,7 +118,7 @@ def modmessage(messageid, newpriority, newcontent, newcls, newduedate, sessionid
         return
 
     # If everything's alright, insert a new message with the given idea:
-    db.query("INSERT INTO usrentries VALUES (userid, description, class, duedate, priority) VALUES (%s, '%s', '%s', '%s', '%s')" % (str(userid), newcontent, newcls, newduedate, newpriority))
+    db.query("INSERT INTO usrentries VALUES (userid, description, class, duedate, priority, title) VALUES (%s, '%s', '%s', '%s', '%s', '%s')" % (str(userid), newcontent, newcls, newduedate, newpriority, newtitle))
     db.commit()
     
     # Determine what the message ID was:
@@ -242,17 +243,18 @@ def main(reqmethod, rsrc):
             delmessage(reqchunks[0], reqchunks[1])
         else:
             generror("Status:400")
-            
-
     else:
         generror("Status:400")
 
+
 rmethod="GET"
 rsrc=None
+query=None
 
 try:
     rmethod=os.environ['REQUEST_METHOD']
-    rsrc=urllib.unquote(os.environ['PATH_INFO'])
+    rsrc=urllib.unquote(os.environ['PATH_INFO']).replace('+', ' ')
+    query=urllib.unquote(os.environ['QUERY_STRING']).replace('+', ' ')
 except:
     pass
 
