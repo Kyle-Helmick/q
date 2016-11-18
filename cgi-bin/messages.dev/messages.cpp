@@ -156,6 +156,9 @@ void listMessages(MYSQL *con, char *sessionid)
 	char *buf;
 	MYSQL_RES *reslt;
 	MYSQL_ROW r;
+	std::vector<MYSQL_ROW> rows;
+	int i;
+	int numrows;
 	
 	userid=getUserId(con, sessionid);
 	buf=(char*) malloc(sizeof(char)*(strlen(sessionid)+255));
@@ -173,14 +176,23 @@ void listMessages(MYSQL *con, char *sessionid)
 	free(buf);
 	
 	reslt=mysql_store_result(con);
-	
+	printHeader();
 	printf("{");
 	
 	while((r=mysql_fetch_row(reslt)))
 	{
-		printf("\"%s\": \"%s\",", r[0], r[1]);
+	    rows.push_back(r);
+		//printf("\"%s\": \"%s\",", r[0], r[1]);
 	}
 	
+	numrows=rows.size()-1;
+	
+	for(i=0;i<numrows;i++)
+	{
+	    printf("\"%s\": \"%s\",", rows[i][0], r[i][1]);
+	}
+	
+    printf("\"%s\": \"%s\"", rows[numrows+1][0], r[i][1]);
 	printf("}");
 	
 	mysql_free_result(reslt);
