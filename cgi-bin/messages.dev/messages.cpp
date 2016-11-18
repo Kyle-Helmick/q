@@ -172,11 +172,13 @@ void listMessages(MYSQL *con, char *sessionid)
 	
 	free(buf);
 	
+	reslt=mysql_store_result(con);
+	
 	printf("{");
 	
 	while((r=mysql_fetch_row(reslt)))
 	{
-		printf("\'%s\": \"%s\",", r[0], r[1]);
+		printf("\"%s\": \"%s\",", r[0], r[1]);
 	}
 	
 	printf("}");
@@ -238,7 +240,7 @@ int main(int argc, char **argv, char **envp)
 		{
 			if(strcmp(pathtoks[1], "list")==0)
 			{
-				listmessages(pathtoks[0]);
+				listMessages(con, pathtoks[0]);
 			}
 			
 		}
