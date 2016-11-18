@@ -189,10 +189,10 @@ void listMessages(MYSQL *con, char *sessionid)
 	
 	for(i=0;i<numrows;i++)
 	{
-	    printf("\"%s\": \"%s\",", rows[i][0], r[i][1]);
+	    printf("\"%s\": \"%s\",", rows[i][0], rows[i][1]);
 	}
 	
-    printf("\"%s\": \"%s\"", rows[numrows+1][0], r[i][1]);
+    printf("\"%s\": \"%s\"", rows[numrows+1][0], rows[i][1]);
 	printf("}");
 	
 	mysql_free_result(reslt);
