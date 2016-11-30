@@ -1,3 +1,7 @@
+// messages.cpp -- Expeimental (relatively) high-performance C++ implementation
+// of the most commonly accessed API.
+// Created by Michael Gohde some time in mid-November.
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -17,12 +21,14 @@ char **splitpath(char *src, int *numtoks)
 	
 	newstr=strdup(src);
 	
-	tmp=strtok(src, "/");
+    tmp=strtok(newstr, "/");
 	
 	do
 	{
-		retlist.push_back(tmp);
+        retlist.push_back(strdup(tmp));
 	} while((tmp=strtok(NULL, "/"))!=NULL);
+
+    free(newstr);
 	
 	numelems=retlist.size();
 	(*numtoks)=numelems;
@@ -150,6 +156,49 @@ char *getUserId(MYSQL *con, char *sessionid)
 	return retVal;
 }
 
+void getMessage(MYSQL *con, char *sessionid, char *messageid)
+{
+    char *userid;
+    char *buf;
+    MYSQL_RES *reslt;
+    MYSQL_ROW r;
+    int i;
+
+    userid=getUserId(con, sessionid);
+    buf=(char*) malloc(sizeof(char)*(strlen(sessionid)+strlen(messageid)+255));
+
+    sprintf(buf, "SELECT * FROM usrentries WHERE userid=%s AND entryid=%s", userid, messageid);
+
+    if(mysql_query(con, buf))
+    {
+        gen400();
+        free(buf);
+        mysql_close(con);
+        exit(-1);
+    }
+
+    free(buf);
+
+    reslt=mysql_store_result(con);
+
+    printHeader();
+
+    printf("{");
+    if(!(r=mysql_fetch_row(reslt)))
+    {
+        gen400();
+        printf("}");
+        return;
+    }
+
+    //Sorry for the absurdly long line!
+    printf("\"entryid\": \"%s\", \"userid\": \"%s\", \"text\": \"%s\", \"class\": \"%s\", \"duedate\": \"%s\", \"priority\": \"%s\", \"title\": \"%s\"}",
+           r[0], r[1], r[2], r[3], r[4], r[5], r[6]);
+
+    mysql_free_result(reslt);
+    free(userid);
+}
+
 void listMessages(MYSQL *con, char *sessionid)
 {
 	char *userid;
@@ -193,7 +242,7 @@ void listMessages(MYSQL *con, char *sessionid)
 	    printf("\"%s\": \"%s\",", r[0], r[1]);
 	}
 	
-	r=rows[numrows+1];
+    r=rows[numrows];
     printf("\"%s\": \"%s\"", r[0], r[1]);
 	printf("}");
 	
@@ -202,18 +251,48 @@ void listMessages(MYSQL *con, char *sessionid)
 	free(userid);
 }
 
+void newMessage(MYSQL *con, char *sessionid, char *priority, char *content, char *cls, char *duedate, char *title)
+{
+    char *buf;
+    char *userid;
+    int totallen=0;
+    int id;
+
+    userid=getUserId(con, sessionid);
+    totallen=strlen(priority)+strlen(content)+strlen(cls)+strlen(duedate)+strlen(title);
+    buf=(char*) malloc(sizeof(char*)*(totallen+255));
+
+    sprintf(buf, "INSERT INTO usrentries (userid, description, class, duedate, priority, title) VALUES (%s, '%s', '%s', '%s', '%s', '%s')",
+            userid, content, cls, duedate, priority, title);
+
+    if(mysql_query(con, buf))
+    {
+        gen400();
+        free(buf);
+        free(userid);
+        mysql_close(con);
+        exit(-1);
+    }
+
+    id=mysql_insert_id(con);
+
+    printf("{\"entryid\":\"%d\"", id);
+
+    free(buf);
+    free(userid);
+}
+
 void freepathtoks(char ***pathtoks, int numtoks)
 {
 	char **toks;
 	int i;
 	
-	toks=(*pathtoks);
-	
-	for(i=0;i<numtoks;i++)
-	{
-		printf("Freeing %d\n", i);
-		free(toks[i]);
-	}
+    toks=(*pathtoks);
+
+    for(i=0;i<numtoks;i++)
+    {
+        free(toks[i]);
+    }
 	
 	free(toks);
 	(*pathtoks)=NULL;
@@ -256,18 +335,26 @@ int main(int argc, char **argv, char **envp)
 			{
 				listMessages(con, pathtoks[0]);
 			}
-			
+
+            else
+            {
+                getMessage(con, pathtoks[0], pathtoks[1]);
+            }
 		}
 	}
+
+    else if(!strcmp(reqmethod, "PUT") && numpathtoks==6)
+    {
+        newMessage(con, pathtoks[0], pathtoks[1], pathtoks[2], pathtoks[3], pathtoks[4], pathtoks[5]);
+    }
 	
 	else
 	{
 		gen400();
 	}
 	
-	mysql_close(con);
+    mysql_close(con);
 	//TODO: Find out what the hell is going on with this function:
-	//freepathtoks(&pathtoks, numpathtoks);
-	free(rsrc);
+    freepathtoks(&pathtoks, numpathtoks);
 	return 0;
 }
