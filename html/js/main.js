@@ -5,21 +5,21 @@ function doCreate(form)
     var password=form.passwordbox.value;
 
     xhttp.onreadystatechange= function() {
-            var resptag=document.getElementById("loginresp");
+            //var resptag=document.getElementById("loginresp");
 
             if(this.readyState==4 && this.status==200)
             {
-                var jobj=JSON.parse(this.responseText);
-                resptag.innerHTML="Session id: "+jobj['sessionid'];
+                //var jobj=JSON.parse(this.responseText);
+                //resptag.innerHTML="Session id: "+jobj['sessionid'];
             }
 
             else if(this.status==400)
             {
-                resptag.innerHTML="Invalid username/password.";
+                //resptag.innerHTML="Invalid username/password.";
             }
         }
 
-    xhttp.open("PUT", "cgi-bin/login/"+username+"/"+password, true);
+    xhttp.open("PUT", "/cgi-bin/login/"+username+"/"+password, true);
     xhttp.send();
     //alert("You typed "+username+", "+password);
 }

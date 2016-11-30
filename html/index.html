@@ -139,10 +139,11 @@
               <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
                 <form role="form">
                   <div class="form-group">
-                    <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter Email">
-                    <input type="password" class="form-control" id="exampleInputPassword" placeholder="Make a Password">
+                    <input type="email" class="form-control" id="usernamebox" placeholder="Enter Email">
+                    <input type="password" class="form-control" id="passwordbox" placeholder="Make a Password">
                   </div>
-                  <button type="submit" class="btn btn-primary btn-lg" onclick="create_user(form)">Create Account</button>
+                  <!--<button type="submit" class="btn btn-primary btn-lg"<button name="button" onclick="doCreate(form)">Create Account</button> -->
+                  <input type="button" name="button" value="Log in!" onClick="doCreate(this.form)">
                 </form>
               </div>
             </div><!--End Form row-->

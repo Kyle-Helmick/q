@@ -1,3 +1,12 @@
+
+// This function was taken from W3Schools:
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+} 
+
 function doLogin(form)
 {
     var xhttp=new XMLHttpRequest();
@@ -10,7 +19,12 @@ function doLogin(form)
             if(this.readyState=4 && this.status==200)
             {
                 var jobj=JSON.parse(this.responseText);
-                resptag.innerHTML="Session id: "+jobj['sessionid'];
+                resptag.innerHTML="Logged in successfully!"+jobj['sessionid'];
+		
+		setCookie("sessionid", jobj['sessionid'], 1);
+		
+		// Redirect users to their q on session creation:
+		window.location.href="/q_bootstrap_todo/index.html";
             }
             else if(this.status==400)
             {
@@ -18,6 +32,6 @@ function doLogin(form)
             }
         }
 
-    xhttp.open("GET", "cgi-bin/login/"+username+"/"+password, true);
+    xhttp.open("GET", "/cgi-bin/login/"+username+"/"+password, true);
     xhttp.send();
 }
