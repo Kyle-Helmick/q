@@ -49,6 +49,16 @@ def endquery(dbquery):
         pass
 
 
+def get_user_ip():
+    ip="1.2.3.4"
+    try:
+	ip=os.environ['REMOTE_ADDR']
+    except:
+	pass
+    
+    return ip
+
+
 # Returns a json object for the given user if the username and password
 # are found in the database.
 def genlogin(uname, pwd):
@@ -70,7 +80,8 @@ def genlogin(uname, pwd):
     # This means that we found the user with correct password. 
     # Generate a session and return info to the caller:
     if len(r)!=0:
-        db.query("INSERT INTO sessions (userid, username, logindate, ipaddr) VALUES (%s, '%s', NOW(), '%s')" % (str(r[0]), r[1], '1.2.3.4'))
+	userip=get_user_ip()
+        db.query("INSERT INTO sessions (userid, username, logindate, ipaddr) VALUES (%s, '%s', NOW(), '%s')" % (str(r[0]), r[1], userip))
         db.commit()
         s=str(r[0])
         db.query("SELECT sessionid FROM sessions WHERE userid='%s'" % s)
@@ -155,6 +166,7 @@ rsrc=None
 try:
     rmethod=os.environ['REQUEST_METHOD']
     rsrc=os.environ['PATH_INFO']
+    
 except:
     pass
 
