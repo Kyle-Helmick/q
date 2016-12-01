@@ -8,7 +8,14 @@ function doCreate(form)
             //var resptag=document.getElementById("loginresp");
 
             if(this.readyState==4 && this.status==200)
-            {
+	    {
+		var jobj=JSON.parse(this.responseText);
+		userid=jobj['userid'];
+		var dest=document.getElementById("invite");
+		dest.innerHTML='<div class="row"><div class="col-sm-8 col-sm-offset-2 text-center"><h2 class="black">Registration successful!</h2></div></div>';
+		//dest.setAttribute("class", "alert success");
+		//dest.appendChild(document.createTextNode("Registration successful!"));
+		
                 //var jobj=JSON.parse(this.responseText);
                 //resptag.innerHTML="Session id: "+jobj['sessionid'];
             }

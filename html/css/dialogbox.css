@@ -1,0 +1,63 @@
+/* dialogbox.css -- CSS definitions for dialog boxes and such. Inspired by 
+ * the CSS tutorial for such at http://www.w3schools.com/howto/howto_css_modals.asp
+ */
+
+.dialogBox
+{
+  display: none;
+  position: fixed;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.dialogHead
+{
+  padding: 2px 16px;
+  background-color: #80aaff;
+  color: white;
+}
+
+.dialogFoot
+{
+  padding: 2px 16px;
+  background-color: #80aaff;
+  color: white;
+}
+
+.dialogBody
+{
+  background-color: #FEFEFE;
+  padding: 2px 16px;
+}
+/*
+.dialogBody
+{
+  background-color: #FFFFFF;
+  color: black;
+  margin: 10% auto;
+  padding: 5%;
+  border: 1px solid #000;
+  width: 80%;
+}
+*/
+
+.dialogCloseButton
+{
+  color: #FFFFFF;
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.dialogCloseButton:hover,
+.dialogCloseButton:focus 
+{
+    color: black;
+    cursor: pointer;
+}
