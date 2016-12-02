@@ -212,7 +212,7 @@ void listMessages(MYSQL *con, char *sessionid)
     userid=getUserId(con, sessionid);
     buf=(char*) malloc(sizeof(char)*(strlen(sessionid)+255));
 	
-    sprintf(buf, "SELECT entryid, title FROM usrentries WHERE userid=%s", userid);
+    sprintf(buf, "SELECT entryid, title, priority FROM usrentries WHERE userid=%s", userid);
 	
     if(mysql_query(con, buf))
     {
@@ -229,11 +229,11 @@ void listMessages(MYSQL *con, char *sessionid)
     printf("{");
 	
     while((r=mysql_fetch_row(reslt)))
-	{
+    {
         rows.push_back(r);
         //printf("\"%s\": \"%s\",", r[0], r[1]);
     }
-	
+    
     numrows=rows.size();
 	
     if(numrows>0)
@@ -242,11 +242,11 @@ void listMessages(MYSQL *con, char *sessionid)
         for(i=0;i<numrows;i++)
         {
             r=rows[i];
-            printf("\"%s\": \"%s\",", r[0], r[1]);
+            printf("\"%s\": {\"title\": \"%s\", \"priority\": \"%s\"},", r[0], r[1], r[2]);
         }
 	
         r=rows[numrows];
-        printf("\"%s\": \"%s\"", r[0], r[1]);
+        printf("\"%s\": {\"title\": \"%s\", \"priority\": \"%s\"}", r[0], r[1], r[2]);
         printf("}");
     }
     
