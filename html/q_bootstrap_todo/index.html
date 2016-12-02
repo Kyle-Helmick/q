@@ -48,7 +48,14 @@
 	  <form role="form" class="todo-form" id="insertForm">
             <p> Title: <input type="text" name="titlebox" value="Easy name for it?"></p>
             <p> Content: <input type="text" name="contentbox" value="What is it?"></p>
-            <p> Priority: <input type="text" name="prioritybox" value="How important is it?"></p>
+            <p> Priority: <select name="prioritybox">
+                            <option value="1">Extremely</option>
+                            <option value="2">Very</option>
+                            <option value="3">Somewhat</option>
+                            <option value="4">Not Very</option>
+                            <option value="5">Not at all</option>
+                          </select>
+            </p>
             <p> Due date: <input type="text" name="datebox" value="YYYY-MM-DD"></p>
           </form>
 	</div>

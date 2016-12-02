@@ -234,10 +234,11 @@ void listMessages(MYSQL *con, char *sessionid)
         //printf("\"%s\": \"%s\",", r[0], r[1]);
     }
 	
-    numrows=rows.size()-1;
+    numrows=rows.size();
 	
-    if(numrows!=0)
+    if(numrows>0)
     {
+        numrows--;
         for(i=0;i<numrows;i++)
         {
             r=rows[i];
