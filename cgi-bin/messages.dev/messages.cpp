@@ -201,50 +201,58 @@ void getMessage(MYSQL *con, char *sessionid, char *messageid)
 
 void listMessages(MYSQL *con, char *sessionid)
 {
-	char *userid;
-	char *buf;
-	MYSQL_RES *reslt;
-	MYSQL_ROW r;
-	std::vector<MYSQL_ROW> rows;
-	int i;
-	int numrows;
+    char *userid;
+    char *buf;
+    MYSQL_RES *reslt;
+    MYSQL_ROW r;
+    std::vector<MYSQL_ROW> rows;
+    int i;
+    int numrows;
 	
-	userid=getUserId(con, sessionid);
-	buf=(char*) malloc(sizeof(char)*(strlen(sessionid)+255));
+    userid=getUserId(con, sessionid);
+    buf=(char*) malloc(sizeof(char)*(strlen(sessionid)+255));
 	
-	sprintf(buf, "SELECT entryid, title FROM usrentries WHERE userid=%s", userid);
+    sprintf(buf, "SELECT entryid, title FROM usrentries WHERE userid=%s", userid);
 	
-	if(mysql_query(con, buf))
+    if(mysql_query(con, buf))
+    {
+        gen400();
+        free(buf);
+        mysql_close(con);
+        exit(-1);
+    }
+	
+    free(buf);
+	
+    reslt=mysql_store_result(con);
+    printHeader();
+    printf("{");
+	
+    while((r=mysql_fetch_row(reslt)))
 	{
-		gen400();
-		free(buf);
-		mysql_close(con);
-		exit(-1);
-	}
+        rows.push_back(r);
+        //printf("\"%s\": \"%s\",", r[0], r[1]);
+    }
 	
-	free(buf);
+    numrows=rows.size()-1;
 	
-	reslt=mysql_store_result(con);
-	printHeader();
-	printf("{");
+    if(numrows!=0)
+    {
+        for(i=0;i<numrows;i++)
+        {
+            r=rows[i];
+            printf("\"%s\": \"%s\",", r[0], r[1]);
+        }
 	
-	while((r=mysql_fetch_row(reslt)))
-	{
-	    rows.push_back(r);
-		//printf("\"%s\": \"%s\",", r[0], r[1]);
-	}
-	
-	numrows=rows.size()-1;
-	
-	for(i=0;i<numrows;i++)
-	{
-	    r=rows[i];
-	    printf("\"%s\": \"%s\",", r[0], r[1]);
-	}
-	
-    r=rows[numrows];
-    printf("\"%s\": \"%s\"", r[0], r[1]);
-	printf("}");
+        r=rows[numrows];
+        printf("\"%s\": \"%s\"", r[0], r[1]);
+        printf("}");
+    }
+    
+    else
+    {
+        printf("{}");
+    }
 	
 	mysql_free_result(reslt);
 	
