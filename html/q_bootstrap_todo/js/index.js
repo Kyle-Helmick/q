@@ -65,7 +65,7 @@ function showEditDialog(msgid)
         }
     }
     
-    xhttp.open("GET", "/cgi-bin/messages/"+sessionid+"/"+msgid);
+    xhttp.open("GET", "/cgi-bin/messages-fast/"+sessionid+"/"+msgid);
     xhttp.send();
 }
 
@@ -140,7 +140,7 @@ function doUpdate()
                 for(var key in jobj)
                 {
                     var destcontent="";
-                    console.log(key);
+                    //console.log(key);
                     var idstr=key+"id";
                     
                     var elem=document.getElementById(idstr);
@@ -158,7 +158,7 @@ function doUpdate()
                     dest.setAttribute("class", "pad-lg light-gray-bg");
                     dest.setAttribute("id", idstr);
                     
-                    destcontent=genDestContent(key, jobj[key]);
+                    destcontent=genDestContent(key, jobj[key]['title']);
                     
                     dest.innerHTML=destcontent;
                     
@@ -175,7 +175,7 @@ function doUpdate()
             }
         }
 
-    xhttp.open("GET", "/cgi-bin/messages/"+sessionid+"/list", true);
+    xhttp.open("GET", "/cgi-bin/messages-fast/"+sessionid+"/list", true);
     xhttp.send();
 }
 
@@ -183,7 +183,7 @@ function doCloseMessage(msgid)
 {
     var elem=document.getElementById(msgid+"id");
     
-    elem.innerHTML=genDestContent(msgid, contentDict[msgid]);
+    elem.innerHTML=genDestContent(msgid, contentDict[msgid]['title']);
 }
 
 function doDeleteMessage(msgid)
@@ -238,6 +238,6 @@ function doMessage(msgid)
             }
         }
 
-    xhttp.open("GET", "/cgi-bin/messages/"+updatesessionid+"/"+msgid, true);
+    xhttp.open("GET", "/cgi-bin/messages-fast/"+updatesessionid+"/"+msgid, true);
     xhttp.send();
 }
