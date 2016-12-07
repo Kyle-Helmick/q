@@ -310,6 +310,7 @@ void freepathtoks(char ***pathtoks, int numtoks)
 int main(int argc, char **argv, char **envp)
 {
 	char *reqmethod;
+	char *rsrc_str;
 	char *rsrc;
 	char *query;
 	char **pathtoks;
@@ -319,8 +320,14 @@ int main(int argc, char **argv, char **envp)
 	
 	
 	reqmethod=getenv("REQUEST_METHOD");
+	rsrc_str=getenv("PATH_INFO");
+
+	if(reqmethod==NULL || rsrc_str==NULL)
+	{
+		return -1;
+	}
 	
-	rsrc=replace(getenv("PATH_INFO"), '+', ' ');
+	rsrc=replace(rsrc_str, '+', ' ');
 	tmp=urlsanitize(rsrc);
 	free(rsrc);
 	rsrc=tmp;

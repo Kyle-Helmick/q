@@ -8,27 +8,69 @@
   <link rel="stylesheet" href="../css/bootstrap.min.css">
   <link rel="stylesheet" href="../css/font-awesome.min.css">
   <link rel="stylesheet" href="../css/main.css">
-
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Raleway:400,100,200,300,500,600,700,800,900|Montserrat:400,700" type="text/css" />
   <script src="js/index.js"></script>
+  <style>
+	.insertpoint *
+	{
+		margin: 0px;
+		padding: 0px;
+		overflow: auto;
+		
+	}
+	.itemclass *
+	{
+		background-color: rgba(0,0,0,.4);
+		padding-left: 2em;
+		padding-right: 2em;
+		color: #e6e6e6;
+	}
+	.itemclass h3
+	{
+		border-width: 2px;
+		border-left-width: 1.5em;
+		border-style: solid;
+		border-color: black;
+	}
+	.itemclass p
+	{
+		border-left-width: 1.4em;
+		border-right-width: 0px;
+		border-top-width: 0px;
+		border-bottom-width: 0px;
+		border-style: solid;
+		border-color: black;
+	}
+	.delete:hover, .expand:hover, .edit:hover, .collapse:hover
+	{
+		background-color: rgba(0,0,0,.3);
+	}
+	.delete:hover
+	{
+		color: pink;
+	}
+	.expand:hover
+	{
+		color: lightyellow;
+	}
+	.edit:hover
+	{
+		color: lightblue;
+	}
+	.collapse:hover
+	{
+		color: lightyellow;
+	}
+	.expand, .delete, .edit, .collapse
+	{
+		background-color: rgba(0,0,0,0);
+		float: right;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+  </style>
+
 </head>
-
-<style>
-    .topdiv
-    {
-	margin-left:auto;
-	margin-right:auto;
-	background-color:lightblue;
-	border:2px solid black;
-    }
-
-    .subdiv
-    {
-	margin-left:4em;
-	margin-right:4em;
-	background-color:lightgreen;
-	border:2px solid black;
-    }
-</style>
 
 <body>
   <header>
@@ -46,14 +88,14 @@
       <div id="newMessageBox" class="dialogBox">
 	<div class="dialogHead">
 	  <span class="dialogCloseButton" id="closeButton">x</span>
-	  <h2>Add a new message</h2>
+	  <h2 style="text-align: center">Add a new message</h2>
 	</div>
 	
-	<div class="dialogBody">
-	  <form role="form" class="todo-form" id="insertForm">
-            <p> Title: <input type="text" name="titlebox" value="Easy name for it?"></p>
-            <p> Content: <input type="text" name="contentbox" value="What is it?"></p>
-            <p> Priority: <select name="prioritybox">
+	<div class="dialogBody" style="background-color: lightgray">
+	  <form role="form" class="todo-form" id="insertForm" style="color: black; background-color: lightgray">
+            <p style="color: black; text-align: center"> Title: <input type="text" name="titlebox" value="Easy name for it?"></p>
+            <p style="color: black; text-align: center"> Content: <input type="text" name="contentbox" value="What is it?"></p>
+            <p style="color: black; text-align: center"> Priority: <select name="prioritybox">
                             <option value="1">Extremely</option>
                             <option value="2">Very</option>
                             <option value="3">Somewhat</option>
@@ -61,12 +103,12 @@
                             <option value="5">Not at all</option>
                           </select>
             </p>
-            <p> Due date: <input type="text" name="datebox" value="YYYY-MM-DD"></p>
+            <p style="color: black; text-align: center"> Due date: <input type="text" name="datebox" value="YYYY-MM-DD"></p>
           </form>
 	</div>
 	
 	<div class="dialogFoot">
-	  <input class="btn btn-secondary btn-lg scroll" type="button" name="button" value="Add Todo Item to Database" onClick="dialogOnClick()">
+	  <input class="btn btn-secondary btn-lg scroll" type="button" style="margin: auto; display: block" name="button" value="Add Todo Item to Database" onClick="dialogOnClick()">
 	</div>
 	
       </div>
@@ -88,6 +130,9 @@
           
           <input class="btn btn-seconday btn-lg scroll" type="button" name="button" value="New..." onClick="showDialog()">
         </div>
+      </div>
+      <div id="insertpoint" class="insertpoint">
+
       </div>
     </div>
   </header>

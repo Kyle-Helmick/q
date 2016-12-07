@@ -113,13 +113,12 @@ function genDestContent(key, title)
 {
     var destcontent="";
     
-    destcontent=destcontent+'<div class="container"><div class="row"><div class="col-sm-8 col-sm-offset-2">';
-    destcontent=destcontent+"<h3>Object id: "+key+". Title: "+title;
-    destcontent=destcontent+" <a onclick=\"doMessage("+key+")\" href=\"javascript:void(0);\">Expand</a>";
-    destcontent=destcontent+" <a onclick=\"doCloseMessage("+key+")\" href=\"javascript:void(0);\">Collapse</a>"
-    destcontent=destcontent+" <a onclick=\"doDeleteMessage("+key+")\" href=\"javascript:void(0);\">Delete</a>";
-    destcontent=destcontent+" <a onclick=\"showEditDialog("+key+")\" href=\"javascript:void(0);\">Edit</a>";
-    destcontent=destcontent+"</h3></div></div></div>\n";
+    destcontent=destcontent+'<h3>Title: '+title;
+    destcontent=destcontent+' <a id="'+key+'ex" class="expand" onclick=\"doMessage('+key+')\" href=\"javascript:void(0);\">Expand</a>';
+    destcontent=destcontent+' <a id="'+key+'co" class="collapse" onclick="doCloseMessage('+key+')\" href=\"javascript:void(0);\">Collapse</a>';
+    destcontent=destcontent+' <a id="'+key+'de" class="delete" onclick=\"doDeleteMessage('+key+')\" href=\"javascript:void(0);\">Delete</a>';
+    destcontent=destcontent+' <a id="'+key+'ed" class="edit" onclick=\"showEditDialog('+key+')\" href=\"javascript:void(0);\">Edit</a>';
+    destcontent=destcontent+"</h3>\n";
                 
     return destcontent;
 }
@@ -135,7 +134,8 @@ function doUpdate()
             if(this.status==200 && this.readyState==4)
             {
                 var jobj=JSON.parse(this.responseText);
-                contentDict=jobj;
+		contentDict=jobj;
+		console.log(contentDict);
                 
                 for(var key in jobj)
                 {
@@ -154,15 +154,18 @@ function doUpdate()
                         console.log("After deletion: "+elem);
                     }
                     
-                    var dest=document.createElement("section");//getElementById("contentContainer");
-                    dest.setAttribute("class", "pad-lg light-gray-bg");
+                    var dest=document.createElement("div");//getElementById("contentContainer");
+                    
+		    // var dest=document.getElementById("insertpoint");
+		    
+		    dest.setAttribute("class", "itemclass");
                     dest.setAttribute("id", idstr);
                     
                     destcontent=genDestContent(key, jobj[key]['title']);
                     
                     dest.innerHTML=destcontent;
                     
-                    document.getElementById("contentContainer").appendChild(dest);
+                    document.getElementById("insertpoint").appendChild(dest);
                     //i++;
                 }
 
@@ -214,22 +217,24 @@ function doMessage(msgid)
             if(this.status==200 && this.readyState==4)
             {
                 var jobj=JSON.parse(this.responseText);
-                var attriblist=["text", "class", "duedate"];
-                var attribname=["Text", "Class name", "Due date"];
+		console.log(jobj);
+                var attriblist=["text", "priority", "duedate"];
+                var attribname=["Text", "Priority", "Due date"];
+		var prioritylist = ["Extremely", "Very", "Somewhat", "Not Very", "Not at all"];
 
                 for(var a in attriblist)
                 {
                     //Create a title element:
                     var topelem=document.createElement("p");
-                    topelem.appendChild(document.createTextNode(attribname[a]+":"));
-
-                    var elem=document.createElement("div");
-                    elem.setAttribute("class", "subdiv");
-
-                    elem.appendChild(document.createTextNode(jobj[attriblist[a]]));
-                    topelem.appendChild(elem);
+		    if(attriblist[a] == "priority") {
+			topelem.innerHTML = (attribname[a]+":"+prioritylist[jobj[attriblist[a]]-1]);
+		    } else {
+		    	topelem.innerHTML = (attribname[a]+":"+jobj[attriblist[a]]);
+		    }
                     dest.appendChild(topelem);
-                }
+		    document.getElementById(msgid+"ex").setAttribute('style', 'display:none');
+		    document.getElementById(msgid+"co").setAttribute('style', 'display:inline');
+                }	
             }
 
             else if(this.status==400)
