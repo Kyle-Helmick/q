@@ -34,8 +34,9 @@
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="javascript:void(open('q_bootstrap_todo/index.html','_self'))">Queue</a></li>
-            <li><a href="javascript:void(open('q_login/index.html','_self'))">Account</a></li>
+            <li><a id="queued" href="javascript:void(open('q_bootstrap_todo/index.html','_self'))">Queue</a></li>
+            <li><a id="logind" href="javascript:void(open('q_login/index.html','_self'))">Login</a></li>
+	    <li><a id="logoutd" href="javascript:void(open('q_logout/index.html','_self'))">Logout</a></li>
           </ul>
         </div><!--/.navbar-collapse -->
       </div>
@@ -48,8 +49,9 @@
             <a href="index.html"><img src="img/q3.png" alt="Logo"></a>
           </div>
           <div class="col-xs-6 signin text-right navbar-nav">
-            <a href="javascript:void(open('q_bootstrap_todo/index.html','_top'))">Queue</a>
-            <a href="javascript:void(open('q_login/index.html','_self'))">Account</a>
+            <a id="queuep" href="javascript:void(open('q_bootstrap_todo/index.html','_top'))">Queue</a>
+            <a id="loginp" href="javascript:void(open('q_login/index.html','_self'))">Login</a>
+	    <a id="logoutp" href="javascript:void(open('q_logout/index.html','_self'))">Logout</a>
           </div>
         </div>
 
@@ -145,7 +147,7 @@
                     <input type="password" class="form-control" id="passwordbox" placeholder="Make a Password">
                   </div>
                   <!--<button type="submit" class="btn btn-primary btn-lg"<button name="button" onclick="doCreate(form)">Create Account</button> -->
-                  <input type="button" name="button" value="Log in!" onClick="doCreate(this.form)">
+                  <input class="btn btn-primary btn-lg" type="button" name="button" value="Sign up!" onClick="doCreate(this.form)">
                 </form>
               </div>
             </div><!--End Form row-->
@@ -212,6 +214,6 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/modernizr-2.7.1.js"></script>
-
+    <script src="js/home.js"></script>
     </body>
 </html>

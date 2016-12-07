@@ -104,25 +104,27 @@ def genlogin(uname, pwd):
 
 # Creates a new user and inserts useful info in the database.
 def genuser(uname, pwd):
+    #print "we're alive"
     pwdhash=hashlib.sha1(pwd).hexdigest()
     db=dbconnect('hashteam', 'passw0rd')
     # Get the next id in the sequence:
-    db.query("SELECT id+1 FROM userlookup WHERE id=(SELECT MAX(id) FROM userlookup)")
-    vals=db.use_result()
-    newid=0
-    try:
-        newid=vals.fetch_row()[0]
-        newid=newid[0]
+    #db.query("SELECT id+1 FROM userlookup WHERE id=(SELECT MAX(id) FROM userlookup)")
+    #vals=db.use_result()
+    #newid=0
+    #try:
+    #    newid=vals.fetch_row()[0]
+    #    newid=newid[0]
 
-        while len(vals.fetch_row())!=0:
-            pass
+    #    while len(vals.fetch_row())!=0:
+    #        pass
 
-    except:
-        generror("Status:400")
-        return
+    #except:
+    #    generror("Status:400")
+    #    return
     printheader()
-    db.query("INSERT INTO userlookup VALUES (%s, '%s', '%s')" % (str(newid), uname, pwdhash))
+    db.query("INSERT INTO userlookup (username, passhash) VALUES ('%s', '%s')" % (uname, pwdhash))
     db.commit()
+    newid=db.insert_id()
     gen_json({'username':uname, 'userid':newid})
     db.close()
 
