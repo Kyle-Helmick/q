@@ -16,6 +16,11 @@ function getCookie(cname) {
 	return "";
 }
 
+function clearListCookies()
+{
+	document.cookie = "sessionid="+getCookie("sessionid")+";expires=Thu, Jan 1970 00:00:00 GMT;"+"domain="+document.domain+";path=/";
+}
+
 window.onload=function()
 {
 	sessionid=getCookie("sessionid");
