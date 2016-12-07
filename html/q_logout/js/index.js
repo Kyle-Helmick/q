@@ -16,9 +16,38 @@ function getCookie(cname) {
 	return "";
 }
 
+// This function was taken from W3Schools:
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/;";
+} 
+
 function clearListCookies()
 {
-	document.cookie = "sessionid="+getCookie("sessionid")+";expires=Thu, Jan 1970 00:00:00 GMT;"+"domain="+document.domain+";path=/";
+    var sessionid=getCookie("sessionid");
+    setCookie("sessionid", "", -1);
+    
+    
+    
+    var xhttp=new XMLHttpRequest();
+
+    xhttp.onreadystatechange= function() {
+            var confirmationtext=document.getElementById("confirmationtext");
+
+            if(this.readyState=4 && this.status==200)
+            {
+                window.location.href="/index.html";
+            }
+            else if(this.status==400)
+            {
+                confirmationtext.innerHTML="Error: Could not log out!";
+            }
+        }
+
+    xhttp.open("DELETE", "/cgi-bin/login/"+sessionid, true);
+    xhttp.send();
 }
 
 window.onload=function()
