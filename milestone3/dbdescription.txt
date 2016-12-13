@@ -1,0 +1,95 @@
+Q database description:
+
++-----------------+
+| Tables_in_qdata |
++-----------------+
+| profiles        |
+| sessions        |
+| userlookup      |
+| usrentries      |
++-----------------+
+
+Description of each table:
+
+ profiles:
+  Unused in q's current release. The purpose of profiles was to store 
+  personalized user information like specific layout settings, real name,
+  etc. In its current state, it stores a userid, first name, last name, 
+  and the date/time of last login.
+  
+  Layout:
+  +-----------+----------+------+-----+---------+-------+
+  | Field     | Type     | Null | Key | Default | Extra |
+  +-----------+----------+------+-----+---------+-------+
+  | id        | int(11)  | NO   | PRI | NULL    |       |
+  | firstname | tinytext | YES  |     | NULL    |       |
+  | lastname  | tinytext | YES  |     | NULL    |       |
+  | lastlogin | datetime | YES  |     | NULL    |       |
+  +-----------+----------+------+-----+---------+-------+
+  
+ sessions:
+  Every time a user logs in, the q backend makes a record in the sessions 
+  table containing various information relevant to the specific user session.
+  
+  This behavior also acts as a security feature by preventing browser histories
+  from being used to collect user information without any credentials.
+
+  sessionid and userid are used for various internal lookups by the backend,
+  while username, logindate, and ipaddr serve as metadata for future security
+  enhancement. 
+  
+  Layout:
+  +-----------+----------+------+-----+---------+----------------+
+  | Field     | Type     | Null | Key | Default | Extra          |
+  +-----------+----------+------+-----+---------+----------------+
+  | sessionid | int(11)  | NO   | PRI | NULL    | auto_increment |
+  | userid    | int(11)  | YES  |     | NULL    |                |
+  | username  | tinytext | YES  |     | NULL    |                |
+  | logindate | datetime | YES  |     | NULL    |                |
+  | ipaddr    | tinytext | YES  |     | NULL    |                |
+  +-----------+----------+------+-----+---------+----------------+
+
+ userlookup:
+  This table contains all usernames, user ids, and password hashes. It is used
+  to authenticate each user session on login.
+  
+  Layout:
+  +----------+----------+------+-----+---------+----------------+
+  | Field    | Type     | Null | Key | Default | Extra          |
+  +----------+----------+------+-----+---------+----------------+
+  | id       | int(11)  | NO   | PRI | NULL    | auto_increment |
+  | username | tinytext | NO   |     | NULL    |                |
+  | passhash | tinytext | NO   |     | NULL    |                |
+  +----------+----------+------+-----+---------+----------------+
+
+ usrentries:
+  usrentries contains every user's todo list items. Currently, not all fields
+  are used by the production frontend, however the table is capable of 
+  storing more or less all values necessary for a todo list in a classroom
+  context.
+  
+  entryid is used to select specific messages, while userid is used to prevent
+  users from seeing each others' data. On every message deletion, both 
+  the userid and entryid are used to find a specific message as protection 
+  against invalid requests.
+  
+  description represents the main body of text that a user may write in each 
+  message.
+  
+  class, while currently unused, represents a specific class (such as CSCI 
+  3308) that a given todo item may be for. In future frontend revisions, 
+  it should be possible to sort by class, due date, and priority in addition
+  to the existing chronological message view.
+  
+  Layout:
+  +-------------+----------+------+-----+---------+----------------+
+  | Field       | Type     | Null | Key | Default | Extra          |
+  +-------------+----------+------+-----+---------+----------------+
+  | entryid     | int(11)  | NO   | PRI | NULL    | auto_increment |
+  | userid      | int(11)  | YES  |     | NULL    |                |
+  | description | text     | YES  |     | NULL    |                |
+  | class       | tinytext | YES  |     | NULL    |                |
+  | duedate     | datetime | YES  |     | NULL    |                |
+  | priority    | int(11)  | YES  |     | NULL    |                |
+  | title       | tinytext | YES  |     | NULL    |                |
+  +-------------+----------+------+-----+---------+----------------+
